@@ -5,6 +5,9 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import os
 from dotenv import load_dotenv
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 
 load_dotenv()
 
@@ -23,7 +26,8 @@ options = webdriver.ChromeOptions()
 options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
 
-driver = webdriver.Chrome(options=options)
+# driver = webdriver.Chrome(options=options)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 def wait_and_interact_with_element(xpath, text_content=""):
     """
