@@ -5,6 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import os
 from dotenv import load_dotenv
+from bs4 import BeautifulSoup
+
 
 load_dotenv()
 
@@ -82,7 +84,7 @@ def seleccionar_propuesta():
             print(f"Se encontraron {len(dropdown_menu)} elementos en el menú desplegable.")
             # Imprimir el texto de cada elemento hijo
             for index, option in enumerate(dropdown_menu):
-                print(f"{index + 1}. Texto del elemento: {option.get_attribute('title')}")
+                print(f"[{index + 1}] {option.get_attribute('title')}")
             # Solicitar al usuario que seleccione una opción
             selected_option = int(input("Por favor, seleccione una opción: "))
             if selected_option > 0 and selected_option <= len(dropdown_menu):
@@ -95,9 +97,48 @@ def seleccionar_propuesta():
     except Exception as e:
         print(f"Se produjo un error: {e}")
 
+def print_pestañas_reportes():
+    # Obtén los enlaces de los reportes
+    global report_links
+    report_links = driver.find_elements(By.XPATH, '//*[@id="js-nav"]/li[3]/ul/li/a')
+
+    # Imprime los ID de los elementos padre
+    for index, link in enumerate(report_links):
+        parent_id = link.find_element(By.XPATH, '..').get_attribute('id')
+        print(f"[{index + 1}] {parent_id}")
+
+def seleccionar_pestaña_reportes(target):
+    # Verifica que la opción sea válida y haz clic en el enlace correspondiente
+    if 1 <= target <= len(report_links):
+        driver.execute_script(f"document.querySelector('#js-nav li:nth-child(3) ul li:nth-child({target}) a').click();")
+    else:
+        print("Opción inválida. Por favor, seleccione una opción válida.")
+
+def all_materias():
+    print("Buscando materias...")
+    
+    # Esperar hasta que el elemento de navegación esté disponible y hacer clic en él
+    wait_and_interact_with_element('//*[@id="cursada"]/a')
+
+    
+    print("Seleccionando materias...")
+    # Esperar hasta que el elemento de navegación esté disponible y hacer clic en él
+    materias = WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.XPATH, '//*[@id="js-listado-materias"]/ul/li/a'))
+    )
+
+    lista_materias = []
+
+    # Imprimir el título de cada materia
+    for materia in materias:
+        lista_materias.append(materia.text)
+        print(materia.text)
+
+    return lista_materias
 
 microsoft_login()
 seleccionar_propuesta()
+all_materias()
 time.sleep(200)
 ################################################################################################
 ###############################  VER NOTIFICACIONES SIU  #######################################
