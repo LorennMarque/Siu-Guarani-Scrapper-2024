@@ -1,3 +1,5 @@
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,10 +10,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 # VARIABLES A CAMBIAR 
 CAMPUS_URL = os.getenv("CAMPUS_URL")
 USER_EMAIL = os.getenv("USER_EMAIL")
 USER_PASSWORD = os.getenv("USER_PASSWORD")
+
+
+# DATOS PARA MOSTRAR
+materias = []
 
 # Verificar si las variables de entorno están definidas
 if not CAMPUS_URL or not USER_EMAIL or not USER_PASSWORD:
@@ -25,6 +32,10 @@ options.add_argument('--no-sandbox')
 
 driver = webdriver.Chrome(options=options)
 
+app = Flask(__name__)
+CORS(app)
+
+##############################################
 def wait_and_interact_with_element(xpath, text_content=""):
     """
     Esta función espera a que un elemento sea clickeable y luego interactúa con él.
@@ -83,66 +94,15 @@ def iterate_over_sons(url_location, parent_xpath):
 
     return output
 
-microsoft_login()
-seleccionar_propuesta(2)
-materias = iterate_over_sons('https://siu.austral.edu.ar/portal/cursada/','//*[@id="js-listado-materias"]/ul/li/a')
-print(materias)
+##############################################
 
+@app.route('/api/materias', methods=['GET'])
+def get_materias():
+    return jsonify(materias)
 
+if __name__ == '__main__':
+    app.run(debug=True)
 
-
-
-
-
-
-
-# def print_pestañas_reportes():
-#     # Obtén los enlaces de los reportes
-#     global report_links
-#     report_links = driver.find_elements(By.XPATH, '//*[@id="js-nav"]/li[3]/ul/li/a')
-
-#     # Imprime los ID de los elementos padre
-#     for index, link in enumerate(report_links):
-#         parent_id = link.find_element(By.XPATH, '..').get_attribute('id')
-#         print(f"[{index + 1}] {parent_id}")
-
-# def seleccionar_pestaña_reportes(target):
-#     # Verifica que la opción sea válida y haz clic en el enlace correspondiente
-#     if 1 <= target <= len(report_links):
-#         driver.execute_script(f"document.querySelector('#js-nav li:nth-child(3) ul li:nth-child({target}) a').click();")
-#     else:
-#         print("Opción inválida. Por favor, seleccione una opción válida.")
-
-
-
-
-# all_materias()
-# time.sleep(200)
-################################################################################################
-###############################  VER NOTIFICACIONES SIU  #######################################
-################################################################################################
-# # VER NOTIFICACIONES => DAR CLICK EN INBOX
-# wait_and_interact_with_element('/html/body/div[1]/div/div/div[2]/div[1]/div/div/ul/li[2]/a')
-
-# time.sleep(3)
-
-# # Iterate over //*[@id="tr8837"] and print each one separated
-# message_elements = driver.find_elements(By.XPATH, '//*[@id="lista_mensajes"]/table/tbody/tr')
-
-# unread_count = 0
-# read_count = 0
-# for message_element in message_elements:
-#     if "leido" in message_element.get_attribute('class'):
-#         print(message_element.text)
-#         unread_count += 1
-#     else:
-#         print(message_element.text + " NEW")
-#         read_count += 1
-
-# print(f"Unread messages: {unread_count}")
-# print(f"Read messages: {read_count}")
-
-# time.sleep(5)
-################################################################################################
-################################################################################################
-################################################################################################
+# microsoft_login()
+# seleccionar_propuesta(2)
+# materias = iterate_over_sons('https://siu.austral.edu.ar/portal/cursada/','//*[@id="js-listado-materias"]/ul/li/a')
