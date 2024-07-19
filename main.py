@@ -20,7 +20,7 @@ if not CAMPUS_URL or not USER_EMAIL or not USER_PASSWORD:
 
 # Initialize the Chrome driver with options
 options = webdriver.ChromeOptions()
-options.add_argument('--headless')  # Run in headless mode if desired
+# options.add_argument('--headless')  # Run in headless mode if desired
 options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
 
@@ -56,6 +56,7 @@ def microsoft_login():
     # Wait for the next button to be clickable and then click it
     wait_and_interact_with_element('//*[@id="idSIButton9"]')
 
+    print("🔐 Login de microsoft...")
     # Wait for the username input field to be clickable and then enter the user's email again
     wait_and_interact_with_element('//*[@id="username"]', USER_EMAIL)
 
@@ -69,16 +70,35 @@ def microsoft_login():
 
 def seleccionar_propuesta():
     print("📚 Seleccionando propuesta académica")
-    dropdown_menu = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, '//*[@id="js-dropdown-menu-carreras"]/li/a')))
-    # Imprimir cada elemento hijo
-    for option in dropdown_menu:
-        print(option.text)
+    try:
+        # Esperar a que el menú desplegable esté presente
+        dropdown_menu = WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="js-dropdown-menu-carreras"]/li/a'))
+        )
+        print("El menú desplegable está presente.")
+        
+        # Verificar si el menú tiene elementos
+        if dropdown_menu:
+            print(f"Se encontraron {len(dropdown_menu)} elementos en el menú desplegable.")
+            # Imprimir el texto de cada elemento hijo
+            for index, option in enumerate(dropdown_menu):
+                print(f"{index + 1}. Texto del elemento: {option.get_attribute('title')}")
+            # Solicitar al usuario que seleccione una opción
+            selected_option = int(input("Por favor, seleccione una opción: "))
+            if selected_option > 0 and selected_option <= len(dropdown_menu):
+                print(f"Ha seleccionado la opción {selected_option}.")
+                driver.execute_script(f"document.querySelector('#js-dropdown-menu-carreras li:nth-child({selected_option}) a').click();")
+            else:
+                print("Opción inválida. Por favor, seleccione una opción válida.")
+        else:
+            print("No se encontraron elementos en el menú desplegable.")
+    except Exception as e:
+        print(f"Se produjo un error: {e}")
 
-    time.sleep(150)
 
 microsoft_login()
 seleccionar_propuesta()
-
+time.sleep(200)
 ################################################################################################
 ###############################  VER NOTIFICACIONES SIU  #######################################
 ################################################################################################
