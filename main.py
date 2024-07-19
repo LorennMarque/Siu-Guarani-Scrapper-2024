@@ -20,7 +20,7 @@ if not CAMPUS_URL or not USER_EMAIL or not USER_PASSWORD:
 
 # Initialize the Chrome driver with options
 options = webdriver.ChromeOptions()
-# options.add_argument('--headless')  # Run in headless mode if desired
+options.add_argument('--headless')  # Run in headless mode if desired
 options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
 
@@ -45,35 +45,39 @@ def microsoft_login():
     # Toma en cuenta el login externo de microsoft. Modificar en caso de que tu universidad no lo ultilice.
     # Ayuda en discord => .lorenn
     print("🔒 Ingresando...")
-    try:
-        driver.get(CAMPUS_URL)
+    driver.get(CAMPUS_URL)
 
-        # Wait for the login button to be clickable and then click it
-        wait_and_interact_with_element('//*[@id="login"]/div/a')
+    # Wait for the login button to be clickable and then click it
+    wait_and_interact_with_element('//*[@id="login"]/div/a')
 
-        # Wait for the email input field to be clickable and then enter the user's email
-        wait_and_interact_with_element('//*[@id="i0116"]', USER_EMAIL)
+    # Wait for the email input field to be clickable and then enter the user's email
+    wait_and_interact_with_element('//*[@id="i0116"]', USER_EMAIL)
 
-        # Wait for the next button to be clickable and then click it
-        wait_and_interact_with_element('//*[@id="idSIButton9"]')
+    # Wait for the next button to be clickable and then click it
+    wait_and_interact_with_element('//*[@id="idSIButton9"]')
 
-        # Wait for the username input field to be clickable and then enter the user's email again
-        wait_and_interact_with_element('//*[@id="username"]', USER_EMAIL)
+    # Wait for the username input field to be clickable and then enter the user's email again
+    wait_and_interact_with_element('//*[@id="username"]', USER_EMAIL)
 
-        # Wait for the password input field to be clickable and then enter the user's password
-        wait_and_interact_with_element('//*[@id="password"]', USER_PASSWORD)
+    # Wait for the password input field to be clickable and then enter the user's password
+    wait_and_interact_with_element('//*[@id="password"]', USER_PASSWORD)
 
-        # Wait for the submit credentials button to be clickable and then click it
-        wait_and_interact_with_element('//*[@id="SubmitCreds"]')
+    # Wait for the submit credentials button to be clickable and then click it
+    wait_and_interact_with_element('//*[@id="SubmitCreds"]')
 
-        print("🔓 We're In")
+    print("🔓 We're In")
 
-    finally:
-        driver.quit()  # Ensure the browser is closed after the script completes
+def seleccionar_propuesta():
+    print("📚 Seleccionando propuesta académica")
+    dropdown_menu = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, '//*[@id="js-dropdown-menu-carreras"]/li/a')))
+    # Imprimir cada elemento hijo
+    for option in dropdown_menu:
+        print(option.text)
 
+    time.sleep(150)
 
 microsoft_login()
-
+seleccionar_propuesta()
 
 ################################################################################################
 ###############################  VER NOTIFICACIONES SIU  #######################################
