@@ -75,6 +75,38 @@ def seleccionar_propuesta(n=1):
     print("📚 Seleccionando propuesta académica")
     driver.execute_script(f"document.querySelector('#js-dropdown-menu-carreras li:nth-child({n}) a').click();")
 
+
+def scrape_subjects():
+    driver.get("https://siu.austral.edu.ar/portal/cursada/")
+    parent_xpath = '//*[@id="js-listado-materias"]/ul/li/a'
+    output = {}
+    WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, parent_xpath)))
+    elements = driver.find_elements(By.XPATH, parent_xpath)
+
+    for element in elements:
+        output[element.text] = {
+            'url': element.get_attribute('href')
+        }
+
+    for subject_name, subject_data in output.items():
+        driver.get(subject_data['url'])
+        time.sleep(0.3)
+        try:
+            cupos = driver.find_element(By.XPATH, '//*[@id="comisiones"]/li/div/ul/li[1]/div[1]/div[2]').text
+        except:
+            cupos = ''
+        try:
+            description = driver.find_element(By.XPATH, '//*[@id="comisiones"]/li/div/ul/div/div[2]').text
+        except:
+            description = ''
+        output[subject_name] = {
+            'url': subject_data['url'],
+            'cupos': cupos,
+            'description': description,
+        }
+
+    return output
+
 def iterate_over_sons(url_location, parent_xpath):
     driver.get(url_location)
     output = []
@@ -89,8 +121,20 @@ def iterate_over_sons(url_location, parent_xpath):
 
 microsoft_login()
 seleccionar_propuesta(2)
-materias = iterate_over_sons('https://siu.austral.edu.ar/portal/cursada/','//*[@id="js-listado-materias"]/ul/li/a')
+materias = scrape_subjects()
 print(materias)
+
+import csv
+import datetime
+
+with open('materias.csv', 'w', newline='') as csvfile:
+    fieldnames = ['data', 'current_date']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for subject_name, subject_data in materias.items():
+        writer.writerow({'data': subject_data, 'current_date': datetime.date.today()})
+
+# materias = iterate_over_sons('https://siu.austral.edu.ar/portal/cursada/','//*[@id="js-listado-materias"]/ul/li/a')
 
 
 
